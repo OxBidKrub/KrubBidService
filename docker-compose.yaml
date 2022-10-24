@@ -1,7 +1,7 @@
 services:
   db:
     image: mysql:5.7
-    platform: linux/x86_64
+    
     restart: always
     networks:
       - lan
@@ -27,7 +27,7 @@ services:
 # Names our volume
   service:
     build: ./
-    container_name: BidKrubAuctionItemService
+    container_name: BidKrubBidService
     env_file:
       - ".env"  
     environment:

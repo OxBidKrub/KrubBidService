@@ -1,6 +1,7 @@
 import { User } from "./entity/user.entity"
 import { DataSource } from "typeorm"
 import { AuctionItem } from "./entity/auctionItem.entity"
+import { Bid } from "./entity/bid.entity"
 
 export const myDataSource = new DataSource({
     type: "mysql",
@@ -9,7 +10,7 @@ export const myDataSource = new DataSource({
     username: process.env.MYSQL_USER || "root",
     password: process.env.MYSQL_PASSWORD || "Watcha49265",
     database: process.env.MYSQL_DATABASE || "oxbidKrub",
-    entities: [AuctionItem],
+    entities: [Bid],
     logging: true,
     synchronize: true,
 })
