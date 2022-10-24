@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { authenticateToken } from "./middleware/authorization";
 import { getAllUsers, getUserbyId, pay, topup } from "./repo/userRepo";
+import { AuctionItem } from "./entity/auctionItem.entity";
 const PORT = process.env.PORT;
 const JWT_SECRET = process.env.JWT_SECRET
 myDataSource
@@ -22,105 +23,52 @@ myDataSource
 
 const app = express();
 app.use(express.json());
-
-app.get("/users", async function (req: Request, res: Response) {
-  const users = await getAllUsers()
-  res.json(users);
-});
-
-app.get('/users/getUserInfo',authenticateToken,(req : any,res) => {
-    res.send(req.user)
+let router = express.Router();
+app.use('', router);
+// register routes
+router.get("/auction-items",authenticateToken, async function (req: Request, res: Response) {
+  const auctionItems = await myDataSource.getRepository(AuctionItem).find()
+  if(!auctionItems){
+      return res.status(401).send("not found auctionItems in database");
+  }
+  return res.status(200).json(auctionItems);
 })
 
-app.post('/users/topup',authenticateToken,async (req : any,res) => {
-    if(req.user.id == req.body.id){
-       try {
-         const topupres =  await topup(req.user.id,req.body.amount);
-        res.send("Topup success")
-       } catch (error) {
-        res.status(400).send("Topup not successful")
-       }
-       
-    }else{
-        res.status(400).send("Invalid Token")
-    }
-    
+router.get("/auction-items/:id",authenticateToken, async function (req: Request, res: Response) {
+  const auctionItem = await myDataSource.getRepository(AuctionItem).findOneBy({
+      id: req.params.id,
+  })
+  if(!auctionItem){
+      return res.status(401).send("not found auctionItem in database");
+  }
+  res.status(200).json(auctionItem)
 })
 
-app.post('/users/pay',authenticateToken,async (req : any,res) => {
-    if(req.user.id == req.body.payerId){
-       try {
-         const paymentres =  await pay(req.user.id,req.body.payeeId,req.body.amount);
-         res.send(paymentres)
-       } catch (error) {
-        res.status(400).send("payment not successfull")
-       }
-       
-       
-    }else{
-        res.status(400).send("Invalid Token")
-    }
+router.post("/auction-items",authenticateToken, async function (req: any, res: Response) {
+  const existingUser = req.user
+  if(!existingUser){
+      return res.status(401).send("not found user in database");
+  }
+  const auctionItem = await myDataSource.getRepository(AuctionItem).create({...req.body,
+  userId: req.user.id});
+  const results = await myDataSource.getRepository(AuctionItem).save(auctionItem)
+  return res.status(200).json(results)
 })
 
-app.get("/users/:id", async function (req: Request, res: Response) {
-  const user = await getUserbyId(req.params.id)
-  const nonSensitiveData = {firstName:user.firstName,lastName:user.lastName}
-  return res.send(user);
-});
-
-
-app.post("/users/login", async (req, res) => {
-  const user = await myDataSource.getRepository(User).findOneBy({
-    email: req.body.email,
-  });
-  if (user == null) {
-    return res.status(400).send("Can not find user");
+router.put("/auction-items/:id", async function (req: Request, res: Response) {
+  const auctionItem = await myDataSource.getRepository(AuctionItem).findOneBy({
+      id: req.params.id,
+  })
+  if(!auctionItem){
+      return res.status(401).send("not found auctionItem in database");
   }
-  try {
-    if (await bcrypt.compare(req.body.password,user.password)) {
-      const tokenData = {
-        id: user.id,
-        username: user.username,
-        firstName:user.firstName,
-        lastName:user.lastName,
-        email: user.email,
-        address:user.address,
-      };
-      const accessToken = jwt.sign(tokenData, JWT_SECRET, {expiresIn:"7d"})
-      res.json({accessToken:accessToken})
-    } else {
-      res.send("not allowed");
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+  myDataSource.getRepository(AuctionItem).merge(auctionItem, req.body)
+  const results = await myDataSource.getRepository(AuctionItem).save(auctionItem)
+  return res.status(200).json(results)
+})
 
-app.post("/users", async function (req: Request, res: Response) {
-  console.log(req.body);
-  try {
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    const tempUser = { ...req.body, password: hashedPassword };
-    const user = await myDataSource.getRepository(User).create(tempUser);
-    const results = await myDataSource.getRepository(User).save(user);
-    return res.send(results);
-  } catch (error) {
-    res.status(500).send(error.code || error);
-  }
-});
-
-app.put("/users/:id", async function (req: Request, res: Response) {
-  const user = await myDataSource.getRepository(User).findOneBy({
-    id: req.params.id,
-  });
-  myDataSource.getRepository(User).merge(user, req.body);
-  const results = await myDataSource.getRepository(User).save(user);
-  return res.send(results);
-});
-
-app.delete("/users/:id", async function (req: Request, res: Response) {
-  const results = await myDataSource.getRepository(User).delete(req.params.id);
-  return res.send(results);
-});
+router.delete("/auction-items/:id", async function (req: Request, res: Response) {
+  const results = await myDataSource.getRepository(AuctionItem).delete(req.params.id)
+  return res.status(200).send("delete successful")
+})
 
