@@ -10,7 +10,7 @@ export const myDataSource = new DataSource({
     username: process.env.MYSQL_USER || "root",
     password: process.env.MYSQL_PASSWORD || "Watcha49265",
     database: process.env.MYSQL_DATABASE || "oxbidKrub",
-    entities: [Bid],
+    entities: [Bid,AuctionItem],
     logging: true,
     synchronize: true,
 })

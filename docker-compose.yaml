@@ -1,10 +1,10 @@
 services:
-  db:
+  biddb:
     image: mysql:5.7
     
     restart: always
     networks:
-      - lan
+      - krubauctionitemservice_lan
     env_file:
       - ".env"  
     environment:
@@ -37,7 +37,7 @@ services:
     expose:
       - ${SERVICE_PORT}
     networks:
-      - lan
+      - krubauctionitemservice_lan
     restart: "unless-stopped"
 
 
@@ -45,5 +45,5 @@ volumes:
   my-db:
 
 networks:
-  lan:
-    driver: bridge
+  krubauctionitemservice_lan:
+    external: true

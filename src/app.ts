@@ -46,30 +46,31 @@ router.get("/bids/:id",authenticateToken, async function (req: Request, res: Res
 })
 
 router.post("/bids",authenticateToken, async function (req: any, res: Response) {
- /*const auctionItem = await myDataSource.getRepository(AuctionItem).findOneBy({
+
+ const auctionItem = await myDataSource.getRepository(AuctionItem).findOneBy({
         id: req.body.auctionItemId,
         
     })
+    console.log(auctionItem);
     if(!auctionItem){
         return res.status(401).send("not found auction item in database");
-    }*/
-    
+    }
     /*const user = await myDataSource.getRepository(User).findOneBy({
         id: req.body.userId,
     })
     if(!user){
         return res.status(401).send("not found user in database");
     }*/
-    //if(auctionItem.minOffer + auctionItem.startingPrice <= req.body.Price) {
+    if(auctionItem.minOffer + auctionItem.startingPrice <= req.body.Price) {
         
         const bid = await myDataSource.getRepository(Bid).create({...req.body,userId: req.user.id});
         const result = await myDataSource.getRepository(Bid).save(bid)
-        //const updateAuctionItem = await myDataSource.getRepository(AuctionItem).merge(auctionItem, {startingPrice: req.body.Price, WinnerId: user.id})
-        //await myDataSource.getRepository(AuctionItem).save(updateAuctionItem)
+        const updateAuctionItem = await myDataSource.getRepository(AuctionItem).merge(auctionItem, {startingPrice: req.body.Price, WinnerId: req.user.name})
+        await myDataSource.getRepository(AuctionItem).save(updateAuctionItem)
         return res.status(200).json(result)
-    //} else {
-        //return res.status(402).send("Your bid price not enough");
-    //}
+    } else {
+        return res.status(402).send("Your bid price not enough");
+    }
 });
 
 router.put("/bids/:id", async function (req: Request, res: Response) {
@@ -80,22 +81,22 @@ router.put("/bids/:id", async function (req: Request, res: Response) {
         return res.status(401).send("not found bid in database");
     }
 
-    // const auctionItem = await myDataSource.getRepository(AuctionItem).findOneBy({
-    //         id: req.body.auctionItemId,
-    // })
+    const auctionItem = await myDataSource.getRepository(AuctionItem).findOneBy({
+            id: req.body.auctionItemId,
+    })
 
-    // if(auctionItem.minOffer + auctionItem.startingPrice <= req.body.Price) {
-    //     const bid = await myDataSource.getRepository(Bid).findOneBy({
-    //         id: req.params.id,
-    //     })
-        //const updateAuctionItem = await myDataSource.getRepository(AuctionItem).merge(auctionItem, {startingPrice: bid.Price, WinnerId: bid.userId})
+    if(auctionItem.minOffer + auctionItem.startingPrice <= req.body.Price) {
+        const bid = await myDataSource.getRepository(Bid).findOneBy({
+            id: req.params.id,
+        })
+        const updateAuctionItem = await myDataSource.getRepository(AuctionItem).merge(auctionItem, {startingPrice: bid.Price, WinnerId: bid.userId})
         await myDataSource.getRepository(Bid).merge(bid, req.body)
         await myDataSource.getRepository(Bid).save(bid)
-        //await myDataSource.getRepository(AuctionItem).save(updateAuctionItem)
+        await myDataSource.getRepository(AuctionItem).save(updateAuctionItem)
         return res.status(200).json(bid)
-    // } else {
-    //     return res.status(402).send("Your bid price is not enough");
-   //}
+    } else {
+        return res.status(402).send("Your bid price is not enough");
+   }
 });
   
 
