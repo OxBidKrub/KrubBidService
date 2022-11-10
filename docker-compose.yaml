@@ -4,7 +4,7 @@ services:
     
     restart: always
     networks:
-      - krubauctionitemservice_lan
+      - krubapigateway_lan
     env_file:
       - ".env"  
     environment:
@@ -25,7 +25,7 @@ services:
     volumes:
       - my-db:/var/lib/mysql
 # Names our volume
-  service:
+  bidauctionservice:
     build: ./
     container_name: BidKrubBidService
     env_file:
@@ -37,7 +37,7 @@ services:
     expose:
       - ${SERVICE_PORT}
     networks:
-      - krubauctionitemservice_lan
+      - krubapigateway_lan
     restart: "unless-stopped"
 
 
@@ -45,5 +45,5 @@ volumes:
   my-db:
 
 networks:
-  krubauctionitemservice_lan:
+  krubapigateway_lan:
     external: true

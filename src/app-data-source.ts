@@ -1,4 +1,4 @@
-import { User } from "./entity/user.entity"
+
 import { DataSource } from "typeorm"
 import { AuctionItem } from "./entity/auctionItem.entity"
 import { Bid } from "./entity/bid.entity"
