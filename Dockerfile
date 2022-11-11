@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-EXPOSE ${PORT}
+EXPOSE 9001
 
 RUN npm install
 
