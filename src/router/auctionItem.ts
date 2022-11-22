@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { authenticateToken } from "../middleware/authorization";
 import { Bid } from "../entity/bid.entity";
 import { AuctionItem } from "../entity/auctionItem.entity";
+import { In } from "typeorm";
 var router = express.Router();
 
 router.get(
@@ -11,6 +12,41 @@ router.get(
   authenticateToken,
   async function (req: Request, res: Response) {
     const auctionItems = await myDataSource.getRepository(AuctionItem).find();
+    if (!auctionItems) {
+      return res.status(401).send("not found auctionItems in database");
+    }
+    return res.status(200).json(auctionItems);
+  }
+);
+
+router.get(
+  "/auction-items/itemByOwner",
+  authenticateToken,
+  async function (req: any, res: Response) {
+    const auctionItems = await myDataSource.getRepository(AuctionItem).findBy({
+      userId: req.user.id,
+    });
+    if (!auctionItems) {
+      return res.status(401).send("not found auctionItems in database");
+    }
+    return res.status(200).json(auctionItems);
+  }
+);
+router.get(
+  "/auction-items/itemByBidder",
+  authenticateToken,
+  async function (req: any, res: Response) {
+    const bids = await myDataSource.getRepository(Bid).findBy({
+      userId: req.user.id,
+    });
+    const itemIds = bids.reduce((result,bid) => {
+      if(!result.includes(bid.auctionItemId)) {
+          result.push(bid.auctionItemId)
+          return result
+    }},[])
+    const auctionItems = await myDataSource.getRepository(AuctionItem).findBy(
+      {id: In(itemIds)}
+    );
     if (!auctionItems) {
       return res.status(401).send("not found auctionItems in database");
     }
