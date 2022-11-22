@@ -19,6 +19,20 @@ router.get(
 );
 
 router.get(
+  "/bids/allMyBids",
+  authenticateToken,
+  async function (req: any, res: Response) {
+    const bids = await myDataSource.getRepository(Bid).findBy({
+      userId: req.user.id,
+    });
+    if (!bids) {
+      return res.status(401).send("not found bids in database");
+    }
+    return res.status(200).json(bids);
+  }
+);
+
+router.get(
   "/bids/:id",
   authenticateToken,
   async function (req: Request, res: Response) {
