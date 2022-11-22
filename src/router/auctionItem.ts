@@ -39,14 +39,17 @@ router.get(
     const bids = await myDataSource.getRepository(Bid).findBy({
       userId: req.user.id,
     });
+    console.log(bids)
     const itemIds = bids.reduce((result,bid) => {
       if(!result.includes(bid.auctionItemId)) {
           result.push(bid.auctionItemId)
           return result
     }},[])
+    console.log(itemIds)
     const auctionItems = await myDataSource.getRepository(AuctionItem).findBy(
       {id: In(itemIds)}
     );
+    
     if (!auctionItems) {
       return res.status(401).send("not found auctionItems in database");
     }
