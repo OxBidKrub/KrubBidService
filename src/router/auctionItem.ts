@@ -13,7 +13,7 @@ router.get(
   async function (req: Request, res: Response) {
     const auctionItems = await myDataSource.getRepository(AuctionItem).find();
     if (!auctionItems) {
-      return res.status(401).send("not found auctionItems in database");
+      return res.status(500).send("not found auctionItems in database");
     }
     return res.status(200).json(auctionItems);
   }
@@ -27,7 +27,7 @@ router.get(
       userId: req.user.id,
     });
     if (!auctionItems) {
-      return res.status(401).send("not found auctionItems in database");
+      return res.status(500).send("not found auctionItems in database");
     }
     return res.status(200).json(auctionItems);
   }
@@ -43,15 +43,14 @@ router.get(
     const itemIds = bids.reduce((result,bid) => {
       if(!result.includes(bid.auctionItemId)) {
           result.push(bid.auctionItemId)
-          return result
-    }},[])
+    }return result},[])
     console.log(itemIds)
     const auctionItems = await myDataSource.getRepository(AuctionItem).findBy(
       {id: In(itemIds)}
     );
-    
+
     if (!auctionItems) {
-      return res.status(401).send("not found auctionItems in database");
+      return res.status(500).send("not found auctionItems in database");
     }
     return res.status(200).json(auctionItems);
   }
@@ -67,7 +66,7 @@ router.get(
         id: req.params.id,
       });
     if (!auctionItem) {
-      return res.status(401).send("not found auctionItem in database");
+      return res.status(500).send("not found auctionItem in database");
     }
     res.status(200).json(auctionItem);
   }
@@ -79,7 +78,7 @@ router.post(
   async function (req: any, res: Response) {
     const existingUser = req.user;
     if (!existingUser) {
-      return res.status(401).send("not found user in database");
+      return res.status(500).send("not found user in database");
     }
     const auctionItem = await myDataSource
       .getRepository(AuctionItem)
@@ -96,7 +95,7 @@ router.put("/auction-items/:id", async function (req: Request, res: Response) {
     id: req.params.id,
   });
   if (!auctionItem) {
-    return res.status(401).send("not found auctionItem in database");
+    return res.status(500).send("not found auctionItem in database");
   }
   myDataSource.getRepository(AuctionItem).merge(auctionItem, req.body);
   const results = await myDataSource
