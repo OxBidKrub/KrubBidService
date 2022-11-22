@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm"
 import { IsNotEmpty, IsString, IsNumber, IsDate, IsUUID, UUIDVersion } from 'class-validator';
 import { Base } from "./base/Base.entity";
 
@@ -11,9 +11,7 @@ export class Bid extends Base{
     @IsNotEmpty()
     Price: number
 
-    @Column()
-    @IsDate()
-    @IsNotEmpty()
+    @CreateDateColumn()
     time: Date
 
     @Column({ nullable: false })
