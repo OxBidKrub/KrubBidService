@@ -51,6 +51,7 @@ router.post(
       if(!user){
           return res.status(401).send("not found user in database");
       }*/
+    
     if (auctionItem.minOffer + auctionItem.startingPrice <= req.body.Price) {
       const bid = await myDataSource
         .getRepository(Bid)
@@ -60,7 +61,7 @@ router.post(
         .getRepository(AuctionItem)
         .merge(auctionItem, {
           startingPrice: req.body.Price,
-          WinnerId: req.user.name,
+          WinnerId: req.user.id,
         });
       await myDataSource.getRepository(AuctionItem).save(updateAuctionItem);
       return res.status(200).json(result);
